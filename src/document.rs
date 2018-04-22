@@ -1,7 +1,7 @@
+use std::clone::Clone;
 use std::collections::HashMap;
 use std::default::Default;
 use std::path::{Path, PathBuf};
-use std::clone::Clone;
 
 use chrono::{Datelike, Timelike};
 use itertools;
@@ -12,10 +12,10 @@ use regex::Regex;
 use rss;
 use unicode_segmentation::UnicodeSegmentation;
 
-use error::*;
+use cobalt_model;
 use cobalt_model::files;
 use cobalt_model::slug;
-use cobalt_model;
+use error::*;
 
 /// Convert the source file's relative path into a format useful for generating permalinks that
 /// mirror the source directory hierarchy.
@@ -100,8 +100,8 @@ fn explode_permalink<S: AsRef<str>>(permalink: S, attributes: &liquid::Object) -
 }
 
 fn explode_permalink_string(permalink: &str, attributes: &liquid::Object) -> Result<String> {
-    lazy_static!{
-       static ref PERMALINK_PARSER: liquid::Parser = liquid::Parser::new();
+    lazy_static! {
+        static ref PERMALINK_PARSER: liquid::Parser = liquid::Parser::new();
     }
     let p = PERMALINK_PARSER.parse(permalink)?;
     let mut p = p.render(attributes)?;
@@ -416,8 +416,8 @@ fn extract_excerpt_raw(content: &str, excerpt_separator: &str) -> String {
 }
 
 fn extract_excerpt_markdown(content: &str, excerpt_separator: &str) -> String {
-    lazy_static!{
-       static ref MARKDOWN_REF: Regex = Regex::new(r"(?m:^ {0,3}\[[^\]]+\]:.+$)").unwrap();
+    lazy_static! {
+        static ref MARKDOWN_REF: Regex = Regex::new(r"(?m:^ {0,3}\[[^\]]+\]:.+$)").unwrap();
     }
 
     let mut trail = String::new();
