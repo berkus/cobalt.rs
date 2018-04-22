@@ -10,6 +10,7 @@ use liquid;
 use liquid::Value;
 use regex::Regex;
 use rss;
+use unicode_segmentation::UnicodeSegmentation;
 
 use error::*;
 use cobalt_model::files;
@@ -143,10 +144,14 @@ fn format_url_as_file_str(permalink: &str) -> PathBuf {
 }
 
 fn document_attributes(
+    content: &str,
     front: &cobalt_model::Frontmatter,
     source_file: &Path,
     url_path: &str,
 ) -> liquid::Object {
+    let words = content.unicode_words().count() as i32;
+    let reading_time = (words + 212) / 213 as i32; // For non-CJK languages
+
     let categories =
         liquid::Value::Array(front.categories.iter().map(liquid::Value::scalar).collect());
     // Reason for `file`:
@@ -164,6 +169,11 @@ fn document_attributes(
     ].into_iter()
         .collect();
     let attributes = vec![
+        ("word_count".to_owned(), liquid::Value::scalar(words)),
+        (
+            "reading_time".to_owned(),
+            liquid::Value::scalar(reading_time),
+        ),
         ("permalink".to_owned(), liquid::Value::scalar(url_path)),
         ("title".to_owned(), liquid::Value::scalar(&front.title)),
         ("slug".to_owned(), liquid::Value::scalar(&front.slug)),
@@ -240,7 +250,7 @@ impl Document {
             (file_path, url_path)
         };
 
-        let doc_attributes = document_attributes(&front, rel_path, url_path.as_ref());
+        let doc_attributes = document_attributes(&content, &front, rel_path, url_path.as_ref());
 
         Ok(Document::new(
             url_path,
